@@ -1,12 +1,12 @@
-#!/usr/bin/env bash
+{% raw %}#!/usr/bin/env bash
 # Based on https://github.com/janeczku/haproxy-acme-validation-plugin/blob/master/cert-renewal-haproxy.sh
 
 #### prerequisites
 # - Fully qualified domain name registered and poiting to the IP of your node
-# - Node installed by {{ playbook_basename }}-playbook) with HAProxy enabled
+# - Node installed by {% endraw %}{{ playbook_basename }}{% raw %}-playbook) with HAProxy enabled
 # - HTTPS enabled on HAProxy (will default to a self-signed certificate)
 # To enable HTTPS run:
-# cd $PLAYBOOK_BASEDIR && git pull && ansible-playbook -i inventory site.yml -v --tags={{ playbook_basename }}_ssl,loadbalancer_role -e '{"lb_bind_addresses": ["0.0.0.0"]}' -e haproxy_https=yes -e overwrite=yes
+# cd $PLAYBOOK_BASEDIR && git pull && ansible-playbook -i inventory site.yml -v --tags={% endraw %}{{ playbook_basename }}{% raw %}_ssl,loadbalancer_role -e '{"lb_bind_addresses": ["0.0.0.0"]}' -e haproxy_https=yes -e overwrite=yes
 
 # This script will automate certificate creation and renewal for let's encrypt and haproxy
 # - checks all certificates under /etc/letsencrypt/live and renews
@@ -33,14 +33,14 @@ fi
 ## configuration ##
 ###################
 
-PLAYBOOK_BASEDIR="/opt/{{ playbook_basename }}-playbook"
+PLAYBOOK_BASEDIR="/opt/{% endraw %}{{ playbook_basename }}{% raw %}-playbook"
 
 # To override 14267 you can specify HAPROXY_PORT environment variable
 # before running this script (or set on the same command-line)
-# Otherwise the port will try to get set from {{ playbook_basename }}-playbook configuration
+# Otherwise the port will try to get set from {% endraw %}{{ playbook_basename }}{% raw %}-playbook configuration
 if [[ -z "$HAPROXY_PORT" ]]; then
-    # Get the configured haproxy {{ playbook_basename }} api port
-    HAPROXY_PORT=$(ls "$PLAYBOOK_BASEDIR"/group_vars/all/*.yml | sort -n | xargs -d '\n' grep ^{{ playbook_basename }}_api_port_remote | tail -1 | awk {'print $2'} | tr -d \'\")
+    # Get the configured haproxy {% endraw %}{{ playbook_basename }}{% raw %} api port
+    HAPROXY_PORT=$(ls "$PLAYBOOK_BASEDIR"/group_vars/all/*.yml | sort -n | xargs -d '\n' grep ^{% endraw %}{{ playbook_basename }}{% raw %}_api_port_remote | tail -1 | awk {'print $2'} | tr -d \'\")
     if [ $? -ne 0 ]; then
         HAPROXY_PORT=14267
     fi
@@ -488,3 +488,4 @@ if [[ $exitcode -eq 0 ]]; then
 fi
 
 add_renewal_crontab
+{% endraw %}
