@@ -11,13 +11,13 @@
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
     - name: Install epel-release
-      yum:
+      package:
         state: latest
         name: epel-release
       when: ansible_distribution == 'CentOS'
 
     - name: Install some packages
-      yum:
+      package:
         name: "{{ packages }}"
       vars:
         packages:
@@ -25,8 +25,7 @@
       when: ansible_distribution == 'CentOS'
 
   when:
-    - install_system_deps is defined
-    - install_system_deps|bool == True
+    - install_system_deps|default(true)|bool
 
 - name: add user to run haproxy as
   user:
