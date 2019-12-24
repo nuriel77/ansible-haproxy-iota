@@ -1,4 +1,4 @@
-- name: allow hornet api port remote in firewall
+- name: allow node api port remote in firewall
   firewalld:
     port: "{{ item }}/tcp"
     permanent: true
@@ -6,7 +6,7 @@
     immediate: yes
   with_items:
     - "{{ haproxy_stats_port }}"
-    - "{{ hornet_api_port_remote }}"
+    - "{{ node_api_port_remote }}"
 
 - name: allow haproxy peering port
   firewalld:

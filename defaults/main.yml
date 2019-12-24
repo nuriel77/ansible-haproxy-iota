@@ -21,16 +21,16 @@ lb_bind_addresses:
   - 127.0.0.1
 
 # This will be the external accessible port
-hornet_api_port_remote: "14267"
+node_api_port_remote: "14267"
 
 # Loadbalancer administrative name
 lb_service_name: my.loadbalancer.io
 
 # Max connections to API
-hornet_api_max_connections: 12
+node_api_max_connections: 12
 
 # Enable remote auth with password (uses the same as iotapm/grafana)
-hornet_remote_auth: false
+node_remote_auth: false
 
 # Load balancer max connections (all backends)
 lb_max_connections: 24
@@ -86,9 +86,9 @@ haproxy_whitelist:
 # Haproxy stats port with https
 haproxy_stats_https: false
 
-# Allowed concurrent connections to all hornet backends
+# Allowed concurrent connections to all node's backends
 # (pow and default)
-haproxy_hornet_max_connections: 360
+haproxy_node_max_connections: 360
 
 # Allowed concurrent connections to PoW backend
 max_connections_pow_backend: 180

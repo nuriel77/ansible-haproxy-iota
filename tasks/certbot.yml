@@ -1,6 +1,6 @@
 - name: copy certbot haproxy script
-  copy:
-    src: files/certbot-haproxy.sh
+  template:
+    src: templates/certbot-haproxy.sh.j2
     dest: /usr/local/bin/certbot-haproxy.sh
     mode: 0755
   tags:
