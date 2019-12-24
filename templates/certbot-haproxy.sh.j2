@@ -40,7 +40,7 @@ PLAYBOOK_BASEDIR="/opt/{% endraw %}{{ playbook_basename }}{% raw %}-playbook"
 # Otherwise the port will try to get set from {% endraw %}{{ playbook_basename }}{% raw %}-playbook configuration
 if [[ -z "$HAPROXY_PORT" ]]; then
     # Get the configured haproxy {% endraw %}{{ playbook_basename }}{% raw %} api port
-    HAPROXY_PORT=$(ls "$PLAYBOOK_BASEDIR"/group_vars/all/*.yml | sort -n | xargs -d '\n' grep ^{% endraw %}{{ playbook_basename }}{% raw %}_api_port_remote | tail -1 | awk {'print $2'} | tr -d \'\")
+    HAPROXY_PORT=$(ls "$PLAYBOOK_BASEDIR"/group_vars/all/*.yml | sort -n | xargs -d '\n' grep ^node_api_port_remote | tail -1 | awk {'print $2'} | tr -d \'\")
     if [ $? -ne 0 ]; then
         HAPROXY_PORT=14267
     fi
