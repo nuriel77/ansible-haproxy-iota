@@ -49,7 +49,7 @@ fi
 # Set defaults
 : ${HAPROXY_CONFIG:=/etc/haproxy/haproxy.cfg}
 : ${HAPROXY_TMPL:=/etc/haproxy/haproxy.cfg.tmpl}
-: ${DOCKER_IMAGE:=certbot/certbot:{% endraw %}{{ certbot_tag }}{% raw %}}}
+: ${DOCKER_IMAGE:=certbot/certbot:{% endraw %}{{ certbot_tag }}{% raw %}}
 HAPROXY_RESTART_CMD="/bin/systemctl restart haproxy"
 HAPROXY_START_CMD="/bin/systemctl start haproxy"
 WEBROOT="/var/lib/haproxy"
