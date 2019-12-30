@@ -119,4 +119,7 @@ haproxy_mounts:
 
 # Certbot docker image
 certbot_image: certbot/certbot
-certbot_tag: latest
+certbot_tag_arch_map:
+  armhf: arm32v6-latest
+  arm64: arm64v8-latest
+  amd64: latest
