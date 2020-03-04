@@ -318,7 +318,7 @@ then
     echo "Using firewalld ..."
     firewall_sequence "/usr/bin/firewall-cmd"
 else
-    echo "Using iptales ..."
+    echo "Using iptables ..."
     for ip_bin in iptables ip6tables; do
         if [ -x "/sbin/$ip_bin" ]; then
             firewall_sequence "$ip_bin"
