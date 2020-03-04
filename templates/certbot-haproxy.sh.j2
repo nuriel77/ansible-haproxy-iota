@@ -54,8 +54,9 @@ HAPROXY_RESTART_CMD="/bin/systemctl restart haproxy"
 HAPROXY_START_CMD="/bin/systemctl start haproxy"
 WEBROOT="/var/lib/haproxy"
 
-# Enable test only
-[[ -n "$TEST_CERT" ]] && STAGING="--test-cert"
+# Add cli options
+[[ "${TEST_CERT}" = true ]] && OPTS=" --test-cert"
+[[ "${FORCE_RENEW}" = true ]] && OPTS+=" --force-renewal"
 
 # Enable to redirect output to logfile (for silent cron jobs)
 LOGFILE="/var/log/certrenewal.log"
@@ -108,7 +109,7 @@ function newCert {
       --preferred-challenges http \
       --email "${EMAIL}" \
       -d "${DOMAIN}" \
-      --agree-tos ${STAGING}
+      --agree-tos ${OPTS}
     RC=$?
     /bin/systemctl start nginx
     return $RC
@@ -127,7 +128,7 @@ function issueCert {
       --standalone \
       --renew-by-default \
       --preferred-challenges http \
-      --agree-tos ${STAGING} ${DOMAINS}
+      --agree-tos ${OPTS} ${DOMAINS}
     RC=$?
     /bin/systemctl start nginx
     return $RC
@@ -361,7 +362,7 @@ else
 
     while IFS= read -r -d '' cert; do
         DOMAIN_DIR=$(dirname "${cert}")
-        if ! openssl x509 -noout -checkend $((4*7*86400)) -in "${cert}"; then
+        if ! openssl x509 -noout -checkend $((4*7*86400)) -in "${cert}" || [[ "${FORCE_RENEW}" = true ]]; then
             subject="$(openssl x509 -noout -subject -in "${cert}" | grep -o -E 'CN ?= ?[^ ,]+' | tr -d 'CN= ?')"
             subjectaltnames="$(openssl x509 -noout -text -in "${cert}" | sed -n '/X509v3 Subject Alternative Name/{n;p}' | sed 's/\s//g' | tr -d 'DNS:' | sed 's/,/ /g')"
             echo "Certificate's CN/subject: '$subject'"
