@@ -198,7 +198,7 @@ function check_firewall {
     then
         /usr/bin/firewall-cmd --list-services | grep -q -w "http" || /usr/bin/firewall-cmd --list-ports | grep -q -w "80/tcp"
     else
-        /sbin/$IP_BIN -L -nv|egrep -q "ACCEPT.*tcp dpt:80$|ACCEPT.*tcp dpt:80 "
+        $IP_BIN -L -nv|egrep -q "ACCEPT.*tcp dpt:80$|ACCEPT.*tcp dpt:80 "
     fi
 }
 
@@ -213,7 +213,7 @@ function enable_firewall {
     then
         COMMAND="test -x /usr/bin/firewall-cmd && /usr/bin/firewall-cmd -q --add-service=http --permanent && /usr/bin/firewall-cmd -q --reload"
     else
-        COMMAND="test -x /sbin/$IP_BIN && /sbin/$IP_BIN -I INPUT 1 -p tcp -m tcp --dport 80 -j ACCEPT"
+        COMMAND="test -x $IP_BIN && $IP_BIN -I INPUT 1 -p tcp -m tcp --dport 80 -j ACCEPT"
     fi
 
     if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]; then
@@ -237,7 +237,7 @@ function disable_firewall {
     then
         COMMAND="test -x /usr/bin/firewall-cmd && /usr/bin/firewall-cmd -q --remove-service=http --permanent && /usr/bin/firewall-cmd -q --reload"
     else
-        COMMAND="test -x /sbin/$IP_BIN && /sbin/$IP_BIN -D INPUT -p tcp -m tcp --dport 80 -j ACCEPT"
+        COMMAND="test -x $IP_BIN && $IP_BIN -D INPUT -p tcp -m tcp --dport 80 -j ACCEPT"
     fi
 
     if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]; then
@@ -277,8 +277,9 @@ function cleanup {
             disable_firewall "/usr/bin/firewall-cmd"
         else
             for ip_bin in iptables ip6tables; do
-                if [ -x "/sbin/$ip_bin" ]; then
-                    disable_firewall "$ip_bin"
+                IP_BIN=$(which $ip_bin)
+                if [ -x "$IP_BIN" ]; then
+                    disable_firewall "$IP_BIN"
                 fi
             done
         fi
@@ -320,8 +321,9 @@ then
 else
     echo "Using iptables ..."
     for ip_bin in iptables ip6tables; do
-        if [ -x "/sbin/$ip_bin" ]; then
-            firewall_sequence "$ip_bin"
+        IP_BIN=$(which $ip_bin)
+        if [ -x "$IP_BIN" ]; then
+            firewall_sequence "$IP_BIN"
         fi
     done
 fi
