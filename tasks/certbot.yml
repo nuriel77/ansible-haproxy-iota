@@ -13,6 +13,8 @@
     tag: "{{ certbot_tag }}"
     force_source: "{{ force_pull_image | default('no') }}"
     source: pull
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   tags:
     - certbot_docker_image
   register: download_image_status
