@@ -12,9 +12,11 @@
   delay: 5
   run_once: yes
   delegate_to: "{{ groups['fullnode']|first }}"
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   when:
     - images_from_master is defined
-    - images_from_master|bool == True
+    - images_from_master|bool
 
 - name: 'download haproxy docker image, this can take a moment...'
   docker_image:
@@ -28,6 +30,8 @@
   until: download_image_status is succeeded
   retries: 2
   delay: 5
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   when: >
         images_from_master is not defined or
         images_from_master|bool == False
@@ -56,6 +60,8 @@
         name: "{{ this_image }}"
         tag: "{{ this_tag }}"
         archive_path: "{{ this_file }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
       when: "image_stat.rc == 1"
 
     - name: copy the docker image from the first node
@@ -66,6 +72,8 @@
       register: image_copied
 
     - name: load the image into docker
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
       docker_image:
         name: "{{ this_image }}"
         tag: "{{ this_tag }}"

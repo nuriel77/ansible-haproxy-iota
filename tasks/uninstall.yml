@@ -95,12 +95,16 @@
     state: absent
 
 - name: remove container
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   docker_container:
     name: haproxy
     state: absent
   ignore_errors: yes
 
 - name: remove haproxy image
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   docker_image:
     state: absent
     force_absent: yes
