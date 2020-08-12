@@ -84,12 +84,12 @@ frontend node_front
     acl source_is_hacker src_http_req_cnt(node_front) gt 1000
     tcp-request content reject if source_is_hacker !whitelist
 
-    # limit OPTIONS method because this is only used on browsers
-    acl options_method method OPTIONS
+    # Allowed methods besides POST of valid commands
+    acl valid_methods method GET OPTIONS
 
     # check HORNET/IOTA header if present all is fine else redirect or kick
     acl api_header req.hdr(X-IOTA-API-Version) -m found
-    http-request deny if !api_header !options_method
+    http-request deny if !api_header !valid_methods
 
 {% if node_remote_auth is defined and node_remote_auth %}
     # Lock with password
@@ -103,7 +103,7 @@ frontend node_front
     acl invalid_command req.body -m reg "${REMOTE_LIMIT_API}"
     acl bad_command req.body -m reg {{ haproxy_bad_command }}
     http-request deny if bad_command
-    http-request deny if !command_exists !options_method
+    http-request deny if !command_exists !valid_methods
     http-request deny if invalid_command !whitelist
 
     {% if iotacaddy_enabled is not defined or iotacaddy_enabled|bool == False %}#{% endif %}acl wants_pow req.body -m reg attachToTangle
@@ -157,10 +157,9 @@ backend node_back
     compression type application/json text/html text/plain text/xml text/json text/css text/javascript application/javascript
 
     option log-health-checks
-    option httpchk POST /
+    option httpchk GET /healthz
     retry-on all-retryable-errors
-    http-request disable-l7-retry if METH_POST
-    http-check expect rstatus 40[0-9]
+    http-check expect rstatus 200
     default-server inter 10s fall 4 rise 2
     server node 127.0.0.1:{{ node_mgmt_api_port if node_net_name is defined else node_api_port }} maxconn {{ node_api_max_connections }} check tfo alpn h2,http/1.1
 
