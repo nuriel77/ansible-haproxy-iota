@@ -163,9 +163,10 @@ backend node_back
     compression type application/json text/html text/plain text/xml text/json text/css text/javascript application/javascript
 
     option log-health-checks
-    option httpchk GET /healthz
+    option httpchk POST /
     retry-on all-retryable-errors
-    http-check expect rstatus 200
+    http-request disable-l7-retry if METH_POST
+    http-check expect rstatus 40[0-9]
     default-server inter 10s fall 4 rise 2
     server node 127.0.0.1:{{ node_mgmt_api_port if node_net_name is defined else node_api_port }} maxconn {{ node_api_max_connections }} check tfo alpn h2,http/1.1
 
