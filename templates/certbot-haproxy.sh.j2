@@ -32,7 +32,7 @@ fi
 ###################
 ## configuration ##
 ###################
-
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 PLAYBOOK_BASEDIR="/opt/{% endraw %}{{ playbook_basename }}{% raw %}-playbook"
 
 # To override 14267 you can specify HAPROXY_PORT environment variable
@@ -218,7 +218,8 @@ function enable_firewall {
         COMMAND="test -x $IP_BIN && $IP_BIN -I INPUT 1 -p tcp -m tcp --dport 80 -j ACCEPT"
     fi
 
-    if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]; then
+    if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]
+    then
         ansible -i "$PLAYBOOK_BASEDIR/inventory-multi" all \
             --key-file=/home/deployer/.ssh/id_rsa \
             --become -u deployer \
@@ -242,7 +243,8 @@ function disable_firewall {
         COMMAND="test -x $IP_BIN && $IP_BIN -D INPUT -p tcp -m tcp --dport 80 -j ACCEPT"
     fi
 
-    if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]; then
+    if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]
+    then
         ansible -i "$PLAYBOOK_BASEDIR/inventory-multi" all \
             --key-file=/home/deployer/.ssh/id_rsa \
             --become -u deployer \
@@ -270,6 +272,27 @@ function firewall_sequence() {
     fi
 }
 
+# Check firewall open for 80/tcp
+function firewall(){
+    if [ -x /usr/bin/firewall-cmd ] && /usr/bin/systemctl status firewalld >/dev/null
+    then
+        echo "Using firewalld ..."
+        firewall_sequence "/usr/bin/firewall-cmd"
+    else
+        echo "Using iptables ..."
+        for ip_bin in iptables ip6tables
+        do
+            IP_BIN=$(which $ip_bin)
+            if [ -x "$IP_BIN" ]
+            then
+                firewall_sequence "$IP_BIN"
+            else
+                logger_error "Cannot find executable '$ip_bin' at '$IP_BIN'"
+            fi
+        done
+    fi
+}
+
 function cleanup {
     if [ "$CLOSE_HTTP_AFTER" = true ]
     then
@@ -278,11 +301,9 @@ function cleanup {
         then
             disable_firewall "/usr/bin/firewall-cmd"
         else
-            for ip_bin in iptables ip6tables; do
-                IP_BIN=$(which $ip_bin)
-                if [ -x "$IP_BIN" ]; then
-                    disable_firewall "$IP_BIN"
-                fi
+            for ip_bin in iptables ip6tables
+            do
+                disable_firewall "$(which $ip_bin)"
             done
         fi
     fi
@@ -315,21 +336,6 @@ then
     exit 1
 fi
 
-# Check firewall open for 80/tcp
-if [ -x /usr/bin/firewall-cmd ] && /usr/bin/systemctl status firewalld >/dev/null
-then
-    echo "Using firewalld ..."
-    firewall_sequence "/usr/bin/firewall-cmd"
-else
-    echo "Using iptables ..."
-    for ip_bin in iptables ip6tables; do
-        IP_BIN=$(which $ip_bin)
-        if [ -x "$IP_BIN" ]; then
-            firewall_sequence "$IP_BIN"
-        fi
-    done
-fi
-
 if [ -f "$PLAYBOOK_BASEDIR/inventory-multi" ]; then
     logger_info "Setting nginx redirect for other nodes"
     REMOVE_NGINX_REDIRECT=true
@@ -349,6 +355,7 @@ renewed_certs=()
 exitcode=0
 if [ -n "$DOMAIN" ]
 then
+    firewall
     newCert
     RC=$?
     if [ $RC -ne 0 ]
@@ -381,6 +388,7 @@ else
                 fi
             done
             echo "IssueCert ${domains}"
+            firewall
             issueCert "${domains}"
             if [ $? -ne 0 ]
             then
