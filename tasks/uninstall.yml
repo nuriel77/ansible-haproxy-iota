@@ -108,8 +108,5 @@
   docker_image:
     state: absent
     force_absent: yes
-    name: "{{ item.image }}"
+    name: "{{ haproxy_image }}"
   ignore_errors: yes
-  with_items:
-    - "{{ haproxy_image }}"
-    - "{{ certbot_image }}"
