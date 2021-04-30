@@ -81,6 +81,7 @@
     - "/etc/{{ etc_config_dir }}/haproxy"
     - "/etc/haproxy"
     - "/etc/logrotate.d/haproxy"
+    - "/usr/local/bin/certbot-haproxy.sh"
   notify:
     - restart rsyslog
 
